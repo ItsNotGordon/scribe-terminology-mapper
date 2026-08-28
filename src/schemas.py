@@ -10,9 +10,9 @@ Why dataclasses:
     named fields and types" without writing a lot of boilerplate.
 
 Why confidence is always None:
-    This first version does not score how "sure" a mapping is. Returning
-    null is honest. A made-up number would look scientific but would not
-    be valid.
+    This version does not score how "sure" a mapping is. Returning null
+    is honest. A made-up number would look scientific but would not be
+    valid.
 """
 
 from __future__ import annotations
@@ -22,8 +22,9 @@ from typing import Any, Literal
 
 EntityType = Literal["diagnosis", "medication"]
 CodeSystem = Literal["ICD-10-CM", "RxNorm"]
-ClinicalContext = Literal["current", "negated", "historical", "uncertain"]
-ReviewStatus = Literal["needs_review", "no_code_found", "api_error"]
+ClinicalContext = Literal["current", "negated", "historical", "uncertain", "follow_up"]
+ReviewStatus = Literal["needs_review", "do_not_code", "no_code_found", "api_error"]
+InferenceSource = Literal["listed_phrase", "medication_reason"]
 
 
 @dataclass
@@ -31,8 +32,8 @@ class PhraseInput:
     """One manually supplied clinical phrase to look up.
 
     phrase: Text we will send to an official terminology API.
-    clinical_context: Extra hint from the synthetic test file, not inferred
-        by an LLM. "negated" means the note denied the finding.
+    clinical_context: Optional hint from the JSON file. The pipeline
+        re-detects context from the note and does not trust this field.
     """
 
     phrase: str
@@ -64,9 +65,8 @@ class CodeCandidate:
 class MappingResult:
     """One mapped entity ready to serialize as JSON.
 
-    suggested_code is the first validated API candidate, never a code that
-    we invented. A human still needs to review it, especially for negated,
-    historical, or uncertain phrases.
+    suggested_code is a ranked, validated API candidate, never a code that
+    we invented. Negated and unconfirmed diseases use do_not_code.
     """
 
     encounter_id: str
@@ -81,6 +81,7 @@ class MappingResult:
     clinical_context: ClinicalContext
     confidence: None = None
     error_message: str | None = None
+    inference_source: InferenceSource = "listed_phrase"
 
     def to_dict(self) -> dict[str, Any]:
         payload = asdict(self)

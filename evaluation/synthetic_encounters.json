@@ -57,8 +57,16 @@
     "encounter_id": "SYN-004",
     "data_type": "synthetic",
     "scenario": "uncertain diagnosis",
-    "note": "SYNTHETIC TEST NOTE: Possible pneumonia. Consider azithromycin if imaging confirms the diagnosis. No real patient identifiers are included.",
+    "note": "SYNTHETIC TEST NOTE: Adult presents with cough and fever. Assessment: possible pneumonia, chest x-ray pending. Consider azithromycin if imaging confirms the diagnosis. No real patient identifiers are included.",
     "diagnoses": [
+      {
+        "phrase": "cough",
+        "clinical_context": "current"
+      },
+      {
+        "phrase": "fever",
+        "clinical_context": "current"
+      },
       {
         "phrase": "pneumonia",
         "clinical_context": "uncertain"
@@ -67,7 +75,7 @@
     "medications": [
       {
         "phrase": "azithromycin",
-        "clinical_context": "current"
+        "clinical_context": "uncertain"
       }
     ]
   },
